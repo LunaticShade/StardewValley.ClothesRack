@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ClothesRack</AssemblyName>
+    <RootNamespace>ClothesRack</RootNamespace>
+    <Version>0.1.0</Version>
+    <TargetFramework>net5.0</TargetFramework>
+    <EnableHarmony>true</EnableHarmony>
+
+    <PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
+
+    <Platforms>AnyCPU</Platforms>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Textures\clothes_rack.png" />
+    <None Remove="Textures\loose_sprites.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Textures\clothes_rack.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.0" />
+  </ItemGroup>
+
+</Project>

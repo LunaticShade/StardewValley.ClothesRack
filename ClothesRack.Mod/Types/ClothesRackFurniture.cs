@@ -28,6 +28,9 @@ namespace ClothesRack.Types
         protected NetRef<Clothing> ShirtSlot { get; } = new NetRef<Clothing>();
         protected NetRef<Clothing> PantsSlot { get; } = new NetRef<Clothing>();
 
+        protected bool playHatHangAnimation = false;
+        protected float hatAnimFrame = 0;
+
         public ClothesRackFurniture(Vector2 tile)
             : base(1305, tile) // derive from the chicken statue, type = decor
         {
@@ -103,8 +106,15 @@ namespace ClothesRack.Types
                 var location = Game1.GlobalToLocal(Game1.viewport, drawPosition + new Vector2(0, -16));
                 var which =hat.which.Value;
                 float scaleSize = 0.9f;
-                bool isPrismatic = hat.isPrismatic.Value;                
-                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)which * 20 % FarmerRenderer.hatsTexture.Width, (int)which * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), MathHelper.ToRadians(20), new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth + 3 / 10000f);
+                bool isPrismatic = hat.isPrismatic.Value;
+
+                float rot = MathHelper.ToRadians(20);
+                if (playHatHangAnimation)
+                {
+                    rot += MathHelper.ToRadians((float)(4 * Math.Sin(hatAnimFrame)));
+                }
+
+                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)which * 20 % FarmerRenderer.hatsTexture.Width, (int)which * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), rot, new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth + 3 / 10000f);
             }
             if (ShirtSlot.Value != null)
             {
@@ -113,6 +123,19 @@ namespace ClothesRack.Types
             if (PantsSlot.Value != null)
             {
                 PantsSlot.Value.drawInMenu(spriteBatch, Game1.GlobalToLocal(Game1.viewport, drawPosition + new Vector2(0, 48)), 1.1f, alpha, layerDepth + 1/10000f, StackDrawType.Hide, Color.White, false);
+            }
+        }
+
+        public override void updateWhenCurrentLocation(GameTime time, GameLocation environment)
+        {
+            if (playHatHangAnimation)
+            {
+                hatAnimFrame += (float)(time.ElapsedGameTime.TotalMilliseconds * 0.02);
+
+                if (hatAnimFrame > 10)
+                {
+                    playHatHangAnimation = false;
+                }
             }
         }
 
@@ -145,6 +168,9 @@ namespace ClothesRack.Types
             SwapClothingItem(HatSlot, Game1.player.hat);
             SwapClothingItem(ShirtSlot, Game1.player.shirtItem);
             SwapClothingItem(PantsSlot, Game1.player.pantsItem);
+
+            hatAnimFrame = 0;
+            playHatHangAnimation = true;
 
             return true;
         }

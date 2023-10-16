@@ -1,4 +1,5 @@
-﻿using ClothesRack.Types;
+﻿using ClothesRack.Patches;
+using ClothesRack.Types;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -8,6 +9,7 @@ using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ClothesRack
 {
@@ -15,6 +17,8 @@ namespace ClothesRack
     {
 
         public static ModTextures ModTextures = new ModTextures();
+
+        SavegamePatch savegamePatch = new SavegamePatch();
 
         public override void Entry(IModHelper helper)
         {
@@ -58,12 +62,13 @@ namespace ClothesRack
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
-            Game1.player.addItemToInventory(new ClothesRackFurniture());
+            //Game1.player.addItemToInventory(new ClothesRackFurniture());
+            savegamePatch.FinishLoad();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
-           
+            savegamePatch.PrepareSave();
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)

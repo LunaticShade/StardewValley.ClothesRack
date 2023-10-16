@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ClothesRack.Patches;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewValley;
@@ -10,28 +11,39 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using static StardewValley.Objects.BedFurniture;
 
 namespace ClothesRack.Types
 {
-   public class ClothesRackFurniture : Furniture
+    [XmlInclude(typeof(ClothesRackFurniture))]
+    public class ClothesRackFurniture : Furniture
     {
         public const int clothingRackId = 9713;
-        protected Texture2D Texture { get; }
+        public const string custom_type_name = "clothes rack";
+
+        protected Texture2D Texture { get; private set; }
 
         protected NetRef<Hat> HatSlot { get; } = new NetRef<Hat>();
         protected NetRef<Clothing> ShirtSlot { get; } = new NetRef<Clothing>();
         protected NetRef<Clothing> PantsSlot { get; } = new NetRef<Clothing>();
 
-        public ClothesRackFurniture()
-            : base()
+        public ClothesRackFurniture(Vector2 tile)
+            : base(1305, tile) // derive from the chicken statue, type = decor
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// Override the originbal furniture's data with custom data
+        /// </summary>
+        private void Init()
         {
             Texture = ClothesRackEntry.ModTextures.ClothesRack;
 
             base.ParentSheetIndex = clothingRackId;
             this.furniture_type.Value = clothingRackId;
             this.Name = "Clothes Rack";
-            this.boundingBox.Value = new Rectangle(0, 0, 1, 2);
 
             int which = 0;
             string[] data = this.getData();
@@ -40,16 +52,13 @@ namespace ClothesRack.Types
             defaultSourceRect.Width = Convert.ToInt32(data[2].Split(' ')[0]);
             defaultSourceRect.Height = Convert.ToInt32(data[2].Split(' ')[1]);
             sourceRect.Value = new Rectangle(which * 16 % furnitureTexture.Width, which * 16 / furnitureTexture.Width * 16, defaultSourceRect.Width * 16, defaultSourceRect.Height * 16);
-            defaultSourceRect.Value = sourceRect.Value;
+            defaultSourceRect.Value = sourceRect.Value;            
+        }
 
-            defaultBoundingBox.Value = new Rectangle((int)tileLocation.X, (int)tileLocation.Y, 1, 1);
-            defaultBoundingBox.Width = Convert.ToInt32(data[3].Split(' ')[0]);
-            defaultBoundingBox.Height = Convert.ToInt32(data[3].Split(' ')[1]);
-            boundingBox.Value = new Rectangle((int)tileLocation.X * 64, (int)tileLocation.Y * 64, defaultBoundingBox.Width * 64, defaultBoundingBox.Height * 64);
-            defaultBoundingBox.Value = boundingBox;
-
-            updateDrawPosition();
-            rotations.Value = Convert.ToInt32(data[4]);
+        public ClothesRackFurniture()
+            : base()
+        {
+            Init();
         }
 
         protected override void initNetFields()
@@ -73,6 +82,7 @@ namespace ClothesRack.Types
             {
                 return;
             }
+
             Rectangle drawn_source_rect = sourceRect.Value;
             float layerDepth;
             if (isDrawingLocationFurniture)
@@ -94,7 +104,7 @@ namespace ClothesRack.Types
                 var which =hat.which.Value;
                 float scaleSize = 0.9f;
                 bool isPrismatic = hat.isPrismatic.Value;                
-                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)which * 20 % FarmerRenderer.hatsTexture.Width, (int)which * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), MathHelper.ToRadians(20), new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth);
+                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)which * 20 % FarmerRenderer.hatsTexture.Width, (int)which * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), MathHelper.ToRadians(20), new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth + 3 / 10000f);
             }
             if (ShirtSlot.Value != null)
             {
@@ -104,26 +114,11 @@ namespace ClothesRack.Types
             {
                 PantsSlot.Value.drawInMenu(spriteBatch, Game1.GlobalToLocal(Game1.viewport, drawPosition + new Vector2(0, 48)), 1.1f, alpha, layerDepth + 1/10000f, StackDrawType.Hide, Color.White, false);
             }
-
-            /*
-            if (heldObject.Value != null)
-            {
-                if (heldObject.Value is Furniture)
-                {
-                    (heldObject.Value as Furniture).drawAtNonTileSpot(spriteBatch, Game1.GlobalToLocal(Game1.viewport, new Vector2(boundingBox.Center.X - 32, boundingBox.Center.Y - (heldObject.Value as Furniture).sourceRect.Height * 4 - (drawHeldObjectLow ? (-16) : 16))), (float)(boundingBox.Bottom - 7) / 10000f, alpha);
-                }
-                else
-                {
-                    spriteBatch.Draw(Game1.shadowTexture, Game1.GlobalToLocal(Game1.viewport, new Vector2(boundingBox.Center.X - 32, boundingBox.Center.Y - (drawHeldObjectLow ? 32 : 85))) + new Vector2(32f, 53f), Game1.shadowTexture.Bounds, Color.White * alpha, 0f, new Vector2(Game1.shadowTexture.Bounds.Center.X, Game1.shadowTexture.Bounds.Center.Y), 4f, SpriteEffects.None, (float)boundingBox.Bottom / 10000f);
-                    spriteBatch.Draw(Game1.objectSpriteSheet, Game1.GlobalToLocal(Game1.viewport, new Vector2(boundingBox.Center.X - 32, boundingBox.Center.Y - (drawHeldObjectLow ? 32 : 85))), GameLocation.getSourceRectForObject(heldObject.Value.ParentSheetIndex), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, (float)(boundingBox.Bottom + 1) / 10000f);
-                }
-            }*/
         }
 
         public override void drawAtNonTileSpot(SpriteBatch spriteBatch, Vector2 location, float layerDepth, float alpha = 1f)
         {
-            Rectangle drawn_source_rect = sourceRect.Value;
-            //drawn_source_rect.X += drawn_source_rect.Width * (int)sourceIndexOffset;
+            Rectangle drawn_source_rect = sourceRect.Value;            
             spriteBatch.Draw(Texture, location, drawn_source_rect, Color.White * alpha, 0f, Vector2.Zero, 4f, flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, layerDepth);
         }
 
@@ -146,15 +141,62 @@ namespace ClothesRack.Types
             {
                 return true;
             }
-
-            // swap outfits
-            var tmpHat = Game1.player.hat.Value;
-
+                        
             SwapClothingItem(HatSlot, Game1.player.hat);
             SwapClothingItem(ShirtSlot, Game1.player.shirtItem);
             SwapClothingItem(PantsSlot, Game1.player.pantsItem);
 
             return true;
+        }
+
+        public void SaveModData(ModDataDictionary target)
+        {
+            target[SavegamePatch.Custom_Type_Field_Uid] = custom_type_name;            
+
+            if (HatSlot.Value != null)
+            {
+                target["hat"] = HatSlot.Value.which.Value.ToString();
+            }
+
+            if (ShirtSlot.Value != null)
+            {
+                target["shirt"] = ShirtSlot.Value.ParentSheetIndex.ToString();
+            }
+
+            if (PantsSlot.Value != null)
+            {
+                target["pants"] = PantsSlot.Value.ParentSheetIndex.ToString();
+            }
+        }
+
+        public void LoadModData(ModDataDictionary target)
+        {
+            if (target.TryGetValue("hat", out string hatIndex))
+            {
+                HatSlot.Value = new Hat(Convert.ToInt32(hatIndex));
+            }
+
+            if (target.TryGetValue("shirt", out string shirtIndex))
+            {
+                ShirtSlot.Value = new Clothing(Convert.ToInt32(shirtIndex));
+            }
+
+            if (target.TryGetValue("pants", out string pantsIndex))
+            {
+                PantsSlot.Value = new Clothing(Convert.ToInt32(pantsIndex));
+            }
+        }
+
+        
+        public override void AttemptRemoval(Action<Furniture> removal_action)
+        {
+            removal_action?.Invoke(this);
+        }
+
+        public override bool canBeRemoved(Farmer who)
+        {
+            // can only be removed, if it does not hodl any clothing items
+            return HatSlot.Value == null && ShirtSlot.Value == null && PantsSlot.Value == null;
         }
     }
 }

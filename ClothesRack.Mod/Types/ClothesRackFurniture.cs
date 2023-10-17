@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using static StardewValley.Minigames.MineCart;
 using static StardewValley.Objects.BedFurniture;
 
 namespace ClothesRack.Types
@@ -20,13 +21,14 @@ namespace ClothesRack.Types
     public class ClothesRackFurniture : Furniture
     {
         public const int clothingRackId = 9713;
-        public const string custom_type_name = "clothes rack";
 
         protected Texture2D Texture { get; private set; }
 
-        protected NetRef<Hat> HatSlot { get; } = new NetRef<Hat>();
-        protected NetRef<Clothing> ShirtSlot { get; } = new NetRef<Clothing>();
-        protected NetRef<Clothing> PantsSlot { get; } = new NetRef<Clothing>();
+        public NetRef<Hat> HatSlot { get; } = new NetRef<Hat>();
+        public NetRef<Clothing> ShirtSlot { get; } = new NetRef<Clothing>();
+        public NetRef<Clothing> PantsSlot { get; } = new NetRef<Clothing>();
+
+        public bool IsEmpty => HatSlot.Value == null && ShirtSlot.Value == null && PantsSlot.Value == null;
 
         protected bool playHatHangAnimation = false;
         protected float hatAnimFrame = 0;
@@ -62,7 +64,7 @@ namespace ClothesRack.Types
             : base()
         {
             Init();
-        }
+        }        
 
         protected override void initNetFields()
         {
@@ -164,55 +166,20 @@ namespace ClothesRack.Types
             {
                 return true;
             }
-                        
-            SwapClothingItem(HatSlot, Game1.player.hat);
+
+            /*SwapClothingItem(HatSlot, Game1.player.hat);
             SwapClothingItem(ShirtSlot, Game1.player.shirtItem);
-            SwapClothingItem(PantsSlot, Game1.player.pantsItem);
-
-            hatAnimFrame = 0;
-            playHatHangAnimation = true;
-
-            return true;
-        }
-
-        public void SaveModData(ModDataDictionary target)
-        {
-            target[SavegamePatch.Custom_Type_Field_Uid] = custom_type_name;            
+            SwapClothingItem(PantsSlot, Game1.player.pantsItem);           
 
             if (HatSlot.Value != null)
             {
-                target["hat"] = HatSlot.Value.which.Value.ToString();
-            }
+                hatAnimFrame = 0;
+                playHatHangAnimation = true;
+            }*/
+            Game1.activeClickableMenu = new ShopMenu(Utility.getCarpenterStock(), 0, "Robin");
 
-            if (ShirtSlot.Value != null)
-            {
-                target["shirt"] = ShirtSlot.Value.ParentSheetIndex.ToString();
-            }
-
-            if (PantsSlot.Value != null)
-            {
-                target["pants"] = PantsSlot.Value.ParentSheetIndex.ToString();
-            }
-        }
-
-        public void LoadModData(ModDataDictionary target)
-        {
-            if (target.TryGetValue("hat", out string hatIndex))
-            {
-                HatSlot.Value = new Hat(Convert.ToInt32(hatIndex));
-            }
-
-            if (target.TryGetValue("shirt", out string shirtIndex))
-            {
-                ShirtSlot.Value = new Clothing(Convert.ToInt32(shirtIndex));
-            }
-
-            if (target.TryGetValue("pants", out string pantsIndex))
-            {
-                PantsSlot.Value = new Clothing(Convert.ToInt32(pantsIndex));
-            }
-        }
-
+            return true;
+        }        
         
         public override void AttemptRemoval(Action<Furniture> removal_action)
         {
@@ -223,6 +190,11 @@ namespace ClothesRack.Types
         {
             // can only be removed, if it does not hodl any clothing items
             return HatSlot.Value == null && ShirtSlot.Value == null && PantsSlot.Value == null;
+        }
+
+        public override Item getOne()
+        {
+            return new ClothesRackFurniture();
         }
     }
 }

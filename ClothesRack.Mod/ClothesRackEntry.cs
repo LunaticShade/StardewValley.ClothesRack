@@ -18,21 +18,17 @@ namespace ClothesRack
 
         public static ModTextures ModTextures = new ModTextures();
 
+        ShopExtension shopExtension = new ShopExtension();
         SavegamePatch savegamePatch = new SavegamePatch();
 
         public override void Entry(IModHelper helper)
         {
             Logger.Init(Monitor, true);
             ModTextures.Init();
-
-            helper.Events.GameLoop.GameLaunched += GameLoop_GameLaunched;
-            
-            helper.Events.GameLoop.UpdateTicked += GameLoop_UpdateTicked;
+            shopExtension.Init(helper);
 
             helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;
             helper.Events.GameLoop.DayEnding += GameLoop_DayEnding;
-
-            helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;
 
             helper.Events.Content.AssetRequested += Content_AssetRequested;
 
@@ -50,16 +46,6 @@ namespace ClothesRack
             }
         }
 
-        private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
-        {
-            
-        }
-
-        private void GameLoop_ReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
-        {
-               
-        }
-
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
             //Game1.player.addItemToInventory(new ClothesRackFurniture());
@@ -69,12 +55,6 @@ namespace ClothesRack
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
             savegamePatch.PrepareSave();
-        }
-
-        private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
-        {
-            if (!Context.IsWorldReady)
-                return;                      
         }
     }
 }

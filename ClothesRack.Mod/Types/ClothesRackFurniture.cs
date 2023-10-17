@@ -167,7 +167,7 @@ namespace ClothesRack.Types
                 return true;
             }
 
-            /*SwapClothingItem(HatSlot, Game1.player.hat);
+            SwapClothingItem(HatSlot, Game1.player.hat);
             SwapClothingItem(ShirtSlot, Game1.player.shirtItem);
             SwapClothingItem(PantsSlot, Game1.player.pantsItem);           
 
@@ -175,8 +175,7 @@ namespace ClothesRack.Types
             {
                 hatAnimFrame = 0;
                 playHatHangAnimation = true;
-            }*/
-            Game1.activeClickableMenu = new ShopMenu(Utility.getCarpenterStock(), 0, "Robin");
+            }
 
             return true;
         }        

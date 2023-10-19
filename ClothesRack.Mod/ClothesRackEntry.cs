@@ -19,7 +19,6 @@ namespace ClothesRack
         public static ModTextures ModTextures = new ModTextures();
 
         ShopExtension shopExtension = new ShopExtension();
-        MenuPatch menuPatch = new MenuPatch();
         SavegamePatch savegamePatch = new SavegamePatch();
         HarmonyPatches harmonyPatches = new HarmonyPatches();
 
@@ -27,8 +26,7 @@ namespace ClothesRack
         {
             Logger.Init(Monitor, true);
             ModTextures.Init();
-            shopExtension.Init(helper);
-            menuPatch.Init(helper);
+            shopExtension.Init(helper);            
             harmonyPatches.Apply(ModManifest.UniqueID);
 
             helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;

@@ -154,13 +154,12 @@ namespace ClothesRack.Patches
             }
         }
 
-        public void PrepareSave()
+        public void BeforeSave()
         {
             SaveList(Game1.player.Items);
-
-            // in order to save, replace every clothes rack with a chicken statue with custom mod data
-            foreach(var location in Game1.locations.OfType<DecoratableLocation>())
-            {                
+                        
+            foreach(var location in Game1.locations)
+            {                                
                 SaveList(location.furniture, location);
                 
                 foreach(var chest in location.Objects.Values.OfType<Chest>())
@@ -170,18 +169,16 @@ namespace ClothesRack.Patches
             }
         }
 
-        public void FinishLoad()
+        public void AfterLoad()
         {
             RestoreInList(Game1.player.Items);
 
             // reload placed game objects            
-            foreach (var location in Game1.locations.OfType<DecoratableLocation>())
+            foreach (var location in Game1.locations)
             {
                 RestoreInFurniture(location.furniture);
                 RestoreInLocationObjects(location);
-            }
-
-            // todo: storage chests
+            }            
         }
     }
 }

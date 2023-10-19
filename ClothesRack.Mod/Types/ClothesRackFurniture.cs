@@ -39,6 +39,11 @@ namespace ClothesRack.Types
             Init();
         }
 
+        public static Rectangle getDefaultSourceRect()
+        {
+            return new Rectangle(0, 0, 16, 32);
+        }
+
         /// <summary>
         /// Override the originbal furniture's data with custom data
         /// </summary>
@@ -187,13 +192,26 @@ namespace ClothesRack.Types
 
         public override bool canBeRemoved(Farmer who)
         {
-            // can only be removed, if it does not hodl any clothing items
+            // can only be removed, if it does not hold any clothing items
             return HatSlot.Value == null && ShirtSlot.Value == null && PantsSlot.Value == null;
         }
 
         public override Item getOne()
         {
             return new ClothesRackFurniture();
+        }        
+
+        public static bool NeedsReplacementInstance(Item item, out Furniture furniture)
+        {
+                
+            if (item is not ClothesRackFurniture && item is Furniture _furniture && _furniture.ParentSheetIndex == ClothesRackFurniture.clothingRackId)
+            {
+                furniture = _furniture;
+                return true;
+            }
+
+            furniture = null;
+            return false;
         }
     }
 }

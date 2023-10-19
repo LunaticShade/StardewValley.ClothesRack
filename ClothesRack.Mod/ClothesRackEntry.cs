@@ -19,13 +19,17 @@ namespace ClothesRack
         public static ModTextures ModTextures = new ModTextures();
 
         ShopExtension shopExtension = new ShopExtension();
+        MenuPatch menuPatch = new MenuPatch();
         SavegamePatch savegamePatch = new SavegamePatch();
+        HarmonyPatches harmonyPatches = new HarmonyPatches();
 
         public override void Entry(IModHelper helper)
         {
             Logger.Init(Monitor, true);
             ModTextures.Init();
             shopExtension.Init(helper);
+            menuPatch.Init(helper);
+            harmonyPatches.Apply(ModManifest.UniqueID);
 
             helper.Events.GameLoop.DayStarted += GameLoop_DayStarted;
             helper.Events.GameLoop.DayEnding += GameLoop_DayEnding;
@@ -47,14 +51,13 @@ namespace ClothesRack
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
-        {
-            //Game1.player.addItemToInventory(new ClothesRackFurniture());
-            savegamePatch.FinishLoad();
+        {            
+            savegamePatch.AfterLoad();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
-            savegamePatch.PrepareSave();
+            savegamePatch.BeforeSave();
         }
     }
 }

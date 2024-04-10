@@ -20,7 +20,8 @@ namespace ClothesRack.Types
     [XmlInclude(typeof(ClothesRackFurniture))]
     public class ClothesRackFurniture : Furniture
     {
-        public const int clothingRackId = 9713;
+        public const string clothingRackItemId = "ClothesRack";
+        public const int clothingRackFurnitureId = 9713;
 
         protected Texture2D Texture { get; private set; }
 
@@ -34,7 +35,7 @@ namespace ClothesRack.Types
         protected float hatAnimFrame = 0;
 
         public ClothesRackFurniture(Vector2 tile)
-            : base(1305, tile) // derive from the chicken statue, type = decor
+            : base("1305", tile) // derive from the chicken statue, type = decor
         {
             Init();
         }
@@ -51,17 +52,17 @@ namespace ClothesRack.Types
         {
             Texture = ClothesRackEntry.ModTextures.ClothesRack;
 
-            base.ParentSheetIndex = clothingRackId;
-            this.furniture_type.Value = clothingRackId;
+            base.ItemId = clothingRackItemId;
+            this.furniture_type.Value = clothingRackFurnitureId;
             this.Name = "Clothes Rack";
 
             int which = 0;
             string[] data = this.getData();
 
-            defaultSourceRect.Value = new Rectangle(which * 16 % furnitureTexture.Width, which * 16 / furnitureTexture.Width * 16, 1, 1);
+            defaultSourceRect.Value = new Rectangle(which * 16 % Texture.Width, which * 16 / Texture.Width * 16, 1, 1);
             defaultSourceRect.Width = Convert.ToInt32(data[2].Split(' ')[0]);
             defaultSourceRect.Height = Convert.ToInt32(data[2].Split(' ')[1]);
-            sourceRect.Value = new Rectangle(which * 16 % furnitureTexture.Width, which * 16 / furnitureTexture.Width * 16, defaultSourceRect.Width * 16, defaultSourceRect.Height * 16);
+            sourceRect.Value = new Rectangle(which * 16 % Texture.Width, which * 16 / Texture.Width * 16, defaultSourceRect.Width * 16, defaultSourceRect.Height * 16);
             defaultSourceRect.Value = sourceRect.Value;            
         }
 
@@ -74,12 +75,16 @@ namespace ClothesRack.Types
         protected override void initNetFields()
         {
             base.initNetFields();
-            base.NetFields.AddFields(HatSlot, ShirtSlot, PantsSlot);
+            NetFields.AddField(HatSlot);
+            NetFields.AddField(ShirtSlot);
+            NetFields.AddField(PantsSlot);            
         }
 
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
-            spriteBatch.Draw(Texture, location + new Vector2(32f, 32f), defaultSourceRect, color * transparency, 0f, new Vector2(defaultSourceRect.Width / 2, defaultSourceRect.Height / 2), 1f * getScaleSize() * scaleSize, SpriteEffects.None, layerDepth);
+            Rectangle sourceRect = defaultSourceRect.Value;       
+
+            spriteBatch.Draw(Texture, location + new Vector2(32f, 32f), sourceRect, color * transparency, 0f, new Vector2(defaultSourceRect.Width / 2, defaultSourceRect.Height / 2), 1f * getScaleSize() * scaleSize, SpriteEffects.None, layerDepth);
             if (((drawStackNumber == StackDrawType.Draw && maximumStackSize() > 1 && Stack > 1) || drawStackNumber == StackDrawType.Draw_OneInclusive) && (double)scaleSize > 0.3 && Stack != int.MaxValue)
             {
                 Utility.drawTinyDigits(stack, spriteBatch, location + new Vector2((float)(64 - Utility.getWidthOfTinyDigitString(stack, 3f * scaleSize)) + 3f * scaleSize, 64f - 18f * scaleSize + 2f), 3f * scaleSize, 1f, color);
@@ -93,12 +98,14 @@ namespace ClothesRack.Types
                 return;
             }
 
-            Rectangle drawn_source_rect = sourceRect.Value;
+            Vector2 drawPosition = new Vector2(this.drawPosition.X, this.drawPosition.Y);
+            Rectangle sourceRect = defaultSourceRect.Value;
+
             float layerDepth;
             if (isDrawingLocationFurniture)
             {
                 layerDepth = ((int)furniture_type == 12) ? (2E-09f + tileLocation.Y / 100000f) : ((float)(boundingBox.Value.Bottom - (((int)furniture_type == 6 || (int)furniture_type == 17 || (int)furniture_type == 13) ? 48 : 8)) / 10000f);
-                spriteBatch.Draw(Texture, Game1.GlobalToLocal(Game1.viewport, drawPosition + ((shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), drawn_source_rect, Color.White * alpha, 0f, Vector2.Zero, 4f, flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, layerDepth);
+                spriteBatch.Draw(Texture, Game1.GlobalToLocal(Game1.viewport, drawPosition + ((shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero)), sourceRect, Color.White * alpha, 0f, Vector2.Zero, 4f, flipped ? SpriteEffects.FlipHorizontally : SpriteEffects.None, layerDepth);
             }
             else
             {
@@ -111,7 +118,7 @@ namespace ClothesRack.Types
                 // HatSlot.Value.drawInMenu(spriteBatch, Game1.GlobalToLocal(Game1.viewport, drawPosition + new Vector2(0, -16)), 1.1f, alpha, layerDepth + 3/10000f, StackDrawType.Hide, Color.White, false);
                 // since we want to draw the hat with a slight rotation, we need to draw it on our own
                 var location = Game1.GlobalToLocal(Game1.viewport, drawPosition + new Vector2(0, -16));
-                var which =hat.which.Value;
+                int hatId = int.Parse(hat.ItemId);
                 float scaleSize = 0.9f;
                 bool isPrismatic = hat.isPrismatic.Value;
 
@@ -121,7 +128,7 @@ namespace ClothesRack.Types
                     rot += MathHelper.ToRadians((float)(4 * Math.Sin(hatAnimFrame)));
                 }
 
-                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)which * 20 % FarmerRenderer.hatsTexture.Width, (int)which * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), rot, new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth + 3 / 10000f);
+                spriteBatch.Draw(FarmerRenderer.hatsTexture, location + new Vector2(32f, 32f), new Rectangle((int)hatId * 20 % FarmerRenderer.hatsTexture.Width, (int)hatId * 20 / FarmerRenderer.hatsTexture.Width * 20 * 4, 20, 20), isPrismatic ? (Utility.GetPrismaticColor() * alpha) : (Color.White * alpha), rot, new Vector2(10f, 10f), 4f * scaleSize, SpriteEffects.None, layerDepth + 3 / 10000f);
             }
             if (ShirtSlot.Value != null)
             {
@@ -133,7 +140,7 @@ namespace ClothesRack.Types
             }
         }
 
-        public override void updateWhenCurrentLocation(GameTime time, GameLocation environment)
+        public override void updateWhenCurrentLocation(GameTime time)
         {
             if (playHatHangAnimation)
             {
@@ -194,9 +201,9 @@ namespace ClothesRack.Types
         {
             // can only be removed, if it does not hold any clothing items
             return HatSlot.Value == null && ShirtSlot.Value == null && PantsSlot.Value == null;
-        }
+        }        
 
-        public override Item getOne()
+        protected override Item GetOneNew()
         {
             return new ClothesRackFurniture();
         }        
@@ -204,7 +211,7 @@ namespace ClothesRack.Types
         public static bool NeedsReplacementInstance(Item item, out Furniture furniture)
         {
                 
-            if (item is not ClothesRackFurniture && item is Furniture _furniture && _furniture.ParentSheetIndex == ClothesRackFurniture.clothingRackId)
+            if (item is not ClothesRackFurniture && item is Furniture _furniture && _furniture.ItemId == ClothesRackFurniture.clothingRackItemId)
             {
                 furniture = _furniture;
                 return true;

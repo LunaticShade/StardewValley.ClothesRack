@@ -43,7 +43,7 @@ namespace ClothesRack
             {
                 e.Edit((data) =>
                 {
-                    data.AsDictionary<int, string>().Data.Add(ClothesRackFurniture.clothingRackId, "Clothes Rack/decor/1 2/1 1/1/500");
+                    data.AsDictionary<string, string>().Data.Add(ClothesRackFurniture.clothingRackItemId, "Clothes Rack/decor/1 2/1 1/1/500");
                 });
             }
         }

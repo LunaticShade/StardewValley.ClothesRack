@@ -27,7 +27,7 @@ namespace ClothesRack.Patches
             if (rack.IsEmpty)
             {
                 // replace with ChickenStatue
-                Furniture chickenStatue = new Furniture(ChickenStatueFurnitureId, rack.TileLocation);
+                Furniture chickenStatue = new Furniture(ChickenStatueFurnitureId.ToString(), rack.TileLocation);
                 chickenStatue.modData[Custom_Type_Field_Uid] = PlaceholderTypeName;
                 return chickenStatue;
             } else
@@ -47,9 +47,9 @@ namespace ClothesRack.Patches
             if (placeholder is Chest chest)
             {
                 ClothesRackFurniture rack = new ClothesRackFurniture(placeholder.TileLocation);
-                rack.HatSlot.Value = chest.items.OfType<Hat>().FirstOrDefault();
-                rack.ShirtSlot.Value = chest.items.OfType<Clothing>().FirstOrDefault(x => x.clothesType.Value == (int)Clothing.ClothesType.SHIRT);
-                rack.PantsSlot.Value = chest.items.OfType<Clothing>().FirstOrDefault(x => x.clothesType.Value == (int)Clothing.ClothesType.PANTS);
+                rack.HatSlot.Value = chest.Items.OfType<Hat>().FirstOrDefault();
+                rack.ShirtSlot.Value = chest.Items.OfType<Clothing>().FirstOrDefault(x => x.clothesType.Value == Clothing.ClothesType.SHIRT);
+                rack.PantsSlot.Value = chest.Items.OfType<Clothing>().FirstOrDefault(x => x.clothesType.Value == Clothing.ClothesType.PANTS);
                 return rack;
             } else
             {
@@ -148,7 +148,7 @@ namespace ClothesRack.Patches
                 {
                     if (obj is Chest chest)
                     {
-                        RestoreInList(chest.items);
+                        RestoreInList(chest.Items);
                     }
                 }
             }
@@ -164,7 +164,7 @@ namespace ClothesRack.Patches
                 
                 foreach(var chest in location.Objects.Values.OfType<Chest>())
                 {
-                    SaveList(chest.items);
+                    SaveList(chest.Items);
                 }
             }
         }

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Menus;
 using StardewValley.Objects;
 using System;
@@ -16,8 +17,7 @@ using static StardewValley.Minigames.MineCart;
 using static StardewValley.Objects.BedFurniture;
 
 namespace ClothesRack.Types
-{
-    [XmlInclude(typeof(ClothesRackFurniture))]
+{   
     public class ClothesRackFurniture : Furniture
     {
         public const string clothingRackItemId = "ClothesRack";
@@ -33,6 +33,8 @@ namespace ClothesRack.Types
 
         protected bool playHatHangAnimation = false;
         protected float hatAnimFrame = 0;
+
+        public override string DisplayName => "Clothes Rack";
 
         public ClothesRackFurniture(Vector2 tile)
             : base("1305", tile) // derive from the chicken statue, type = decor
@@ -78,7 +80,7 @@ namespace ClothesRack.Types
             NetFields.AddField(HatSlot);
             NetFields.AddField(ShirtSlot);
             NetFields.AddField(PantsSlot);            
-        }
+        } 
 
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {

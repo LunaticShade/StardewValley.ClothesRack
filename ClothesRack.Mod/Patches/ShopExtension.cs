@@ -31,14 +31,13 @@ namespace ClothesRack.Patches
 
         protected void ShopOpened(ShopMenu shop)
         {
-            // TODO: Update 1.6
-            /*if ((shop.portraitPerson.Name?.ToLower() ?? "") == "robin")
+            if ((shop.ShopId?.ToLower() ?? "") == "carpenter")
             {
-                // Add the clothes rack to the carpenter's shop's stack
+                // Add the clothes rack to the carpenter's shop's stack                
                 Item saleItem = new ClothesRackFurniture();
-                shop.forSale.Add(saleItem);
-                shop.itemPriceAndStock.Add(saleItem, new int[] { 350, int.MaxValue });                
-            }*/
+                shop.forSale.Insert(0, saleItem);
+                shop.itemPriceAndStock.Add(saleItem, new ItemStockInformation(350, int.MaxValue));
+            }
         }
     }
 }
